@@ -1,5 +1,6 @@
 from picamera2 import Picamera2
 import cv2
+
 class Camera():
     def __init__(self):
         self.picam = Picamera2()
