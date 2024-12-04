@@ -4,7 +4,7 @@ import RPi.GPIO
 
 import configloading
 
-class fmemitter():
+class FMemitter():
     def __init__(self):
         config = configloading.Config_reader()
         self.i2c = smbus.SMBus(1)
@@ -26,7 +26,7 @@ class fmemitter():
 def main():
     while(True):
         string = input(">>>")
-        fm = fmemitter()
+        fm = FMemitter()
         fm.transmitFMMessage(string)
 
 if __name__ == "__main__":
