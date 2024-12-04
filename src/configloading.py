@@ -9,4 +9,6 @@ class Config_reader():
         var = self.config.get(key,value)
         if style == "intenger":
             var = int(var,0)
+        elif style == "character":
+            var = str(var)
         return var
