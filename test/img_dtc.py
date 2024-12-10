@@ -11,7 +11,7 @@ class ImageDetection():
             print("Image not loaded properly.")
             return
         self.height = config.reader("camera", "height", "character")
-        self.weight = config.reader("camera", "weight", "character")
+        self.width = config.reader("camera", "weight", "character")
 
     def red_mask(self):
         if self.img is None:
@@ -50,17 +50,47 @@ class ImageDetection():
         # 膨張
         img_dilate = cv2.dilate(img_erode,neiborhood,iterations=10)
         cv2.imwrite("../img/result/opening.jpg",img_dilate)
+        self.get_target_point(img_dilate)
 
-    def filter(self):
-        pass
+    def get_target_point(self,img):
+        coordinates_x = {}
+        coordinates_y = {}
 
-    def get_coordinates(self):
-        pass
+        temp = get_coordinates(img)
+        coordinates_x["top"] = temp[1][0]
+        coordinates_y["top"] = temp[0][0]
+        img = rorate_img(img)
 
+        temp = list(temp)
+        temp.clear()
+        temp = get_coordinates(img)
+        coordinates_x["left"] = temp[0][0]
+        coordinates_y["left"] = int(self.height) - temp[1][0]
+        img = rorate_img(img)
+        img = rorate_img(img)
+
+        temp = list(temp)
+        temp.clear()
+        temp = get_coordinates(img)
+        coordinates_x["right"] = int(self.width) - temp[0][0]
+        coordinates_y["right"] = temp[1][0]
+        img = rorate_img(img)
+
+        cv2.line(img,(coordinates_x["top"],coordinates_y["top"]),(coordinates_x["right"],coordinates_y["right"]),(255,0,0),thickness=10,lineType=cv2.LINE_8,shift=0)
+        cv2.line(img,(coordinates_x["right"],coordinates_y["right"]),(coordinates_x["left"],coordinates_y["left"]),(0,255,0),thickness=10,lineType=cv2.LINE_8,shift=0)
+        cv2.line(img,(coordinates_x["left"],coordinates_y["left"]),(coordinates_x["top"],coordinates_y["top"]),(0,0,255),thickness=10,lineType=cv2.LINE_8,shift=0)
+
+        cv2.imwrite("result.jpg",img)
 
 def bgr_to_hsv(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
+def get_coordinates(img):
+    white_pixels = np.where(img)
+    return white_pixels
+
+def rorate_img(img):
+    return cv2.rotate(img,cv2.ROTATE_90_CLOCKWISE)
 
 def main():
     img_detection = ImageDetection()
