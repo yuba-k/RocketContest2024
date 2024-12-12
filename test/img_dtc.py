@@ -50,7 +50,23 @@ class ImageDetection():
         # 膨張
         img_dilate = cv2.dilate(img_erode,neiborhood,iterations=10)
         cv2.imwrite("../img/result/opening.jpg",img_dilate)
-        self.get_target_point(img_dilate)
+        img = self.filter(img_dilate)
+        self.get_target_point(img)
+
+    def filter(self,img):
+        contours,_= cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
+        # 小さい輪郭は誤検出として削除する
+        contours = list(filter(lambda x: cv2.contourArea(x) > 1000, contours))
+        # 一番面積が大きい輪郭を選択する。
+        if not contours or all(cv2.contourArea(x) == 0 for x in contours):
+            return "search"
+        else:
+            print("not empty")
+            max_cnt = max(contours, key=lambda x: cv2.contourArea(x))
+        # 黒い画像に一番大きい輪郭だけ塗りつぶして描画する
+        out = np.zeros_like(img)
+        cv2.drawContours(img, [max_cnt], -1, color=255, thickness=-1)
+        return img
 
     def get_target_point(self,img):
         coordinates_x = {}
@@ -65,28 +81,35 @@ class ImageDetection():
         temp.clear()
         temp = get_coordinates(img)
         coordinates_x["left"] = temp[0][0]
-        coordinates_y["left"] = int(self.height) - temp[1][0]
+        coordinates_y["left"] = abs(int(self.height) - temp[1][0])
         img = rorate_img(img)
         img = rorate_img(img)
 
         temp = list(temp)
         temp.clear()
         temp = get_coordinates(img)
-        coordinates_x["right"] = int(self.width) - temp[0][0]
+        coordinates_x["right"] = abs(int(self.width) - temp[0][0])
         coordinates_y["right"] = temp[1][0]
         img = rorate_img(img)
 
         cv2.line(img,(coordinates_x["top"],coordinates_y["top"]),(coordinates_x["right"],coordinates_y["right"]),(255,0,0),thickness=10,lineType=cv2.LINE_8,shift=0)
-        cv2.line(img,(coordinates_x["right"],coordinates_y["right"]),(coordinates_x["left"],coordinates_y["left"]),(0,255,0),thickness=10,lineType=cv2.LINE_8,shift=0)
-        cv2.line(img,(coordinates_x["left"],coordinates_y["left"]),(coordinates_x["top"],coordinates_y["top"]),(0,0,255),thickness=10,lineType=cv2.LINE_8,shift=0)
+        cv2.imwrite("../img/result/line_1.jpg",img)
+        cv2.line(img,(coordinates_x["right"],coordinates_y["right"]),(coordinates_x["left"],coordinates_y["left"]),(255,0,0),thickness=10,lineType=cv2.LINE_8,shift=0)
+        cv2.imwrite("../img/result/line_2.jpg",img)
+        cv2.line(img,(coordinates_x["left"],coordinates_y["left"]),(coordinates_x["top"],coordinates_y["top"]),(255,0,0),thickness=10,lineType=cv2.LINE_8,shift=0)
 
-        cv2.imwrite("result.jpg",img)
+        for i,j in coordinates_x.items():
+            print(f"{i}_x:{j}")
+        for i,j in coordinates_y.items():
+            print(f"{i}_y:{j}")
+
+        cv2.imwrite("../img/result/result.jpg",img)
 
 def bgr_to_hsv(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
 def get_coordinates(img):
-    white_pixels = np.where(img)
+    white_pixels = np.where(img == 255)
     return white_pixels
 
 def rorate_img(img):
