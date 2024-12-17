@@ -1,15 +1,15 @@
 import RPi.GPIO as GPIO
 import time
-import configparser
+import configloading
 
 class Motor():
-    def __init__(self,config):
-        self.config = config
-        self.duty = int(self.config['MOTER'].get('duty'))
-        self.right_pwm = int(self.config['MOTER'].get('right_pwm'))
-        self.left_pwm = int(self.config['MOTER'].get('left_pwm'))
-        self.right_phase = int(self.config['MOTER'].get('right_ph'))
-        self.left_phase = int(self.config['MOTER'].get('left_ph'))
+    def __init__(self):
+        self.config = configloading.Config_reader()
+        self.duty = self.config.reader("MOTER","duty","intenger")
+        self.right_pwm = self.config.reader("MOTER","right_pwm","intenger")
+        self.left_pwm = self.config.reader("MOTER","left_pwm","intenger")
+        self.right_phase = self.config.reader("MOTER","right_phase","intenger")
+        self.left_phase = self.config.reader("MOTER","left_phase","intenger")
 
         GPIO.setmode(GPIO.BCM)#setmodeでBCMを用いて指定することを宣言　#GPIOピン番号のこと！
 

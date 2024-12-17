@@ -14,6 +14,7 @@ class Camera():
         self.picam.start()
         im = self.picam.capture_array()
         self.save(im)
+        return im
     def save(self,im):
         cv2.imwrite("test_cv2.jpg",im)
 
