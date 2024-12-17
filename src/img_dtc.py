@@ -6,17 +6,12 @@ import configloading
 class ImageDetection():
     def __init__(self):
         config = configloading.Config_reader()
-        self.img = cv2.imread("../img/default/100cm.jpg")
-        if self.img is None:
-            print("Image not loaded properly.")
-            return
+
         self.height = config.reader("camera", "height", "character")
         self.width = config.reader("camera", "weight", "character")
 
-    def red_mask(self):
-        if self.img is None:
-            print("Image not loaded properly.")
-            return
+    def red_mask(self,img):
+        self.img = img
 
         # 赤色のHSV範囲
         hsv_min1 = np.array([0, 100, 100])
@@ -39,7 +34,8 @@ class ImageDetection():
 
         # 結果を保存
         cv2.imwrite("../img/result/masked.jpg", masked_img)
-        self.opening(masked_img)
+
+        return self.opening(masked_img)
 
     def opening(self,img):
         gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -105,6 +101,17 @@ class ImageDetection():
 
         cv2.imwrite("../img/result/result.jpg",img)
 
+        return get_center_point(coordinates_x["left"],coordinates_x["right"],coordinates_x["top"])
+
+    def get_center_point(self,right,left,top):
+        result = ((right+left)/2 + top)//2
+        if result < self.width//3:
+            return "left"
+        elif result < self.width//3*2:
+            return "forward"
+        else:
+            return "right"
+
 def bgr_to_hsv(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -114,6 +121,8 @@ def get_coordinates(img):
 
 def rorate_img(img):
     return cv2.rotate(img,cv2.ROTATE_90_CLOCKWISE)
+
+
 
 def main():
     img_detection = ImageDetection()
