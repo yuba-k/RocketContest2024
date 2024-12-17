@@ -1,4 +1,4 @@
-from camera2 import Camera.cap as capture
+from camera2 import Camera
 import img_dtc
 import motor
 
@@ -7,7 +7,7 @@ def main():
     motor = motor.Motor
 
     while True:
-        img = capture()
+        img = Camera.cap()
         result_direction = img_dtc.red_mask(img)
         motor.move(result_direction,1.5)
 
