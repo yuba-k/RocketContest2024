@@ -6,7 +6,7 @@ import configloading
 class ImageDetection():
     def __init__(self):
         config = configloading.Config_reader()
-        self.img = cv2.imread("../img/default/75cm.jpg")
+        self.img = cv2.imread("../img/default/100cm.jpg")
         if self.img is None:
             print("Image not loaded properly.")
             return
@@ -92,11 +92,11 @@ class ImageDetection():
         coordinates_y["right"] = temp[1][0]
         img = rorate_img(img)
 
-        cv2.line(img,(coordinates_x["top"],coordinates_y["top"]),(coordinates_x["right"],coordinates_y["right"]),(255,0,0),thickness=10,lineType=cv2.LINE_8,shift=0)
+        cv2.line(img,(coordinates_x["top"],coordinates_y["top"]),(coordinates_x["right"],coordinates_y["right"]),(100,0,0),thickness=10,lineType=cv2.LINE_8,shift=0)
         cv2.imwrite("../img/result/line_1.jpg",img)
-        cv2.line(img,(coordinates_x["right"],coordinates_y["right"]),(coordinates_x["left"],coordinates_y["left"]),(255,0,0),thickness=10,lineType=cv2.LINE_8,shift=0)
+        cv2.line(img,(coordinates_x["right"],coordinates_y["right"]),(coordinates_x["left"],coordinates_y["left"]),(100,0,0),thickness=10,lineType=cv2.LINE_8,shift=0)
         cv2.imwrite("../img/result/line_2.jpg",img)
-        cv2.line(img,(coordinates_x["left"],coordinates_y["left"]),(coordinates_x["top"],coordinates_y["top"]),(255,0,0),thickness=10,lineType=cv2.LINE_8,shift=0)
+        cv2.line(img,(coordinates_x["left"],coordinates_y["left"]),(coordinates_x["top"],coordinates_y["top"]),(100,0,0),thickness=10,lineType=cv2.LINE_8,shift=0)
 
         for i,j in coordinates_x.items():
             print(f"{i}_x:{j}")
