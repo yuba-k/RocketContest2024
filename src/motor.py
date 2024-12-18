@@ -2,9 +2,13 @@ import RPi.GPIO as GPIO
 import time
 import configloading
 
+import logwrite
+
 class Motor():
     def __init__(self):
         self.config = configloading.Config_reader()
+        self.log = logwrite.MyLogging()
+
         self.duty = self.config.reader("MOTOR","duty","intenger")
         self.right_pwm = self.config.reader("MOTOR","right_pwm","intenger")
         self.left_pwm = self.config.reader("MOTOR","left_pwm","intenger")
@@ -46,14 +50,18 @@ class Motor():
         GPIO.output(self.right_phase,GPIO.HIGH)
         GPIO.output(self.left_phase,GPIO.HIGH)
         if direction == "forward":
+            self.log.write("forward","INFO")
             self.right_duty = self.left_duty = self.duty
         elif direction == "right":
+            self.log.write("right","INFO")
             self.right_duty = self.duty * 0.6
             self.left_duty = self.duty
         elif direction == "left":
+            self.log.write("left","INFO")
             self.right_duty = self.duty
             self.left_duty = self.duty * 0.6
         else:
+            self.log.write("back","INFO")
             self.right_duty = self.left_duty = self.duty
             GPIO.output(self.right_phase,GPIO.LOW)
             GPIO.output(self.left_phase,GPIO.LOW)

@@ -49,7 +49,7 @@ class ImageDetection():
         img = self.filter(img_dilate)
         if img is None:
             return "search"
-        self.get_target_point(img)
+        return self.get_target_point(img)
 
     def filter(self,img):
         contours,_= cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)

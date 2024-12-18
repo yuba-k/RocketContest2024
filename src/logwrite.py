@@ -7,17 +7,17 @@ class MyLogging():
             logging.config.fileConfig(f)
         self.logger = logging.getLogger('root')
 
-    def write(logmessage,loglevel):
+    def write(self,logmessage,loglevel):
         if loglevel=="DEBUG":
-            logger.debug(f"{logmessage}")
+            self.logger.debug(f"{logmessage}")
         elif loglevel=="INFO":
-            logger.info(f"{logmessage}")
+            self.logger.info(f"{logmessage}")
         elif loglevel=="WARNING":
-            logger.warning(f"{logmessage}")
+            self.logger.warning(f"{logmessage}")
         elif loglevel=="ERROR":
-            logger.error(f"{logmessage}")
+            self.logger.error(f"{logmessage}")
         elif loglevel=="CRITICAL":
-            logger.critical(f"{logmessage}")
+            self.logger.critical(f"{logmessage}")
 
 def main():
     log = MyLogging()
