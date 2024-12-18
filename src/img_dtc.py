@@ -7,8 +7,8 @@ class ImageDetection():
     def __init__(self):
         config = configloading.Config_reader()
 
-        self.height = config.reader("camera", "height", "character")
-        self.width = config.reader("camera", "weight", "character")
+        self.height = config.reader("camera", "height", "intenger")
+        self.width = config.reader("camera", "weight", "intenger")
 
     def red_mask(self,img):
         self.img = img
@@ -47,6 +47,8 @@ class ImageDetection():
         img_dilate = cv2.dilate(img_erode,neiborhood,iterations=10)
         cv2.imwrite("../img/result/opening.jpg",img_dilate)
         img = self.filter(img_dilate)
+        if img is None:
+            return "search"
         self.get_target_point(img)
 
     def filter(self,img):
@@ -55,7 +57,7 @@ class ImageDetection():
         contours = list(filter(lambda x: cv2.contourArea(x) > 1000, contours))
         # 一番面積が大きい輪郭を選択する。
         if not contours or all(cv2.contourArea(x) == 0 for x in contours):
-            return "search"
+            return None
         else:
             print("not empty")
             max_cnt = max(contours, key=lambda x: cv2.contourArea(x))
@@ -101,7 +103,7 @@ class ImageDetection():
 
         cv2.imwrite("../img/result/result.jpg",img)
 
-        return get_center_point(coordinates_x["left"],coordinates_x["right"],coordinates_x["top"])
+        return self.get_center_point(coordinates_x["left"],coordinates_x["right"],coordinates_x["top"])
 
     def get_center_point(self,right,left,top):
         result = ((right+left)/2 + top)//2
