@@ -10,7 +10,7 @@ class ImageDetection():
         self.height = config.reader("camera", "height", "intenger")
         self.width = config.reader("camera", "weight", "intenger")
 
-    def red_mask(self,img):
+    def red_mask(self,img,cnt):
         self.img = img
 
         # 赤色のHSV範囲
@@ -35,9 +35,9 @@ class ImageDetection():
         # 結果を保存
         cv2.imwrite("../img/result/masked.jpg", masked_img)
 
-        return self.opening(masked_img)
+        return self.opening(masked_img,cnt)
 
-    def opening(self,img):
+    def opening(self,img,cnt):
         gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         _,img = cv2.threshold(gray,0,255,cv2.THRESH_OTSU)# 入力画像（グレースケール画像を指定すること）# 閾値 # 閾値を超えた画素に割り当てる値# 閾値処理方法
         neiborhood = np.array([[0, 1, 0],[1, 1, 1],[0, 1, 0]],np.uint8)
@@ -49,7 +49,7 @@ class ImageDetection():
         img = self.filter(img_dilate)
         if img is None:
             return "search"
-        return self.get_target_point(img)
+        return self.get_target_point(img,cnt)
 
     def filter(self,img):
         contours,_= cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
@@ -66,7 +66,7 @@ class ImageDetection():
         cv2.drawContours(img, [max_cnt], -1, color=255, thickness=-1)
         return img
 
-    def get_target_point(self,img):
+    def get_target_point(self,img,cnt):
         coordinates_x = {}
         coordinates_y = {}
 
@@ -101,7 +101,7 @@ class ImageDetection():
         for i,j in coordinates_y.items():
             print(f"{i}_y:{j}")
 
-        cv2.imwrite("../img/result/result.jpg",img)
+        cv2.imwrite(f"../img/result/{cnt}result.jpg",img)
 
         return self.get_center_point(coordinates_x["left"],coordinates_x["right"],coordinates_x["top"])
 

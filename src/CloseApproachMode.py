@@ -10,10 +10,12 @@ def main():
     mt = motor.Motor()
 
     log.write(loglevel="INFO",logmessage="start")
+    cnt = 0
     while True:
-        img = camera.cap()
-        result_direction = imgdetect.red_mask(img)
-        mt.move(result_direction,1.5)
+        img = camera.cap(cnt)
+        result_direction = imgdetect.red_mask(img,cnt)
+        mt.move(result_direction,0.25)
+        cnt += 1
 
 if __name__ == "__main__":
     main()

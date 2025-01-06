@@ -1,5 +1,6 @@
 from picamera2 import Picamera2
 import cv2
+import numpy as np
 
 import configloading
 
@@ -10,13 +11,15 @@ class Camera():
         weight = config.reader("camera","weight","intenger")
         self.picam = Picamera2()
         self.picam.configure(self.picam.create_still_configuration(main={"format":"RGB888","size":(weight,height)}))
-    def cap(self):
+    def cap(self,cnt):
         self.picam.start()
         im = self.picam.capture_array()
-        self.save(im)
+        im = np.flipud(im)
+        im = np.fliplr(im)
+        self.save(im,cnt)
         return im
-    def save(self,im):
-        cv2.imwrite("../img/default/test_cv2.jpg",im)
+    def save(self,im,cnt):
+        cv2.imwrite(f"../img/default/{cnt}test_cv2.jpg",im)
 
 def main():
     camera = Camera()
