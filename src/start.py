@@ -13,9 +13,9 @@ def init():
 def awaiting():
     log = logwrite.MyLogging()
     while(True):
-        value= GPIO.input(st_pin)
+        value = GPIO.input(st_pin)
         print(value)
-        if(value==0):
+        if(value == 0):
             log.write("program start","INFO")
             break
         time.sleep(1)
