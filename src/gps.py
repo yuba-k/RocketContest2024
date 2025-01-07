@@ -4,36 +4,35 @@ import serial
 import adafruit_gps
 import sys
 import RPi.GPIO as GPIO
-import logging.config
+import logwrite
 import signal
 import motor
+import configloading
 
 def main():
-    duty = 70
+    log = logwrite.MyLogging()
+    motor = motor.Motor()
     sec = 10
-
-    #ログの設定の読み込み
-#    logging.config.fileConfig('logging.ini')
-    logger = logging.getLogger(__name__)
+    duty = 80
     
     #ゴールの座標をここに入力！
     coordinate_goal = {'lat':30.374266, 'lon':130.960020}
-    logger.info(f"coordinate_goal:{coordinate_goal}")
+    log.wrote(f"coordinate_goal:{coordinate_goal}","INFO")
 
     coordinate_new = get_gpsdata()
     while not gps.has_fix:  #GPSデータの取得待ち...     Loading...
         print("Waiting for fix...")
         time.sleep(1)
         coordinate_new = get_gpsdata()
-    logger.info(f"{coordinate_new}")
-    motor.move("straight", 75 , sec) #とりあえずsec秒前進．前へすすめー！
+    log.write(f"{coordinate_new}","INFO")
+    motor.move("straight" , sec, duty=75) #とりあえずsec秒前進．前へすすめー！
     while True:
         coordinate_old = coordinate_new
         coordinate_new = get_gpsdata()
         while(coordinate_old['lat'] == coordinate_new['lat'] and
            coordinate_old['lon'] == coordinate_new['lon']):
             coordinate_new = get_gpsdata()  #前回と今回のGPSデータが同一だった場合，新規取得
-        logger.info(f"現在座標:{coordinate_new}")
+        log.write(f"現在座標:{coordinate_new}","INFO")
         
         if not gps.has_fix or coordinate_new['lat'] is None:
             print("Waiting for fix...")
@@ -64,17 +63,17 @@ def main():
         if distance<=0.00005:
             return 0#距離が0.00005km(5m)以下になったらGPSフェーズ終了
         distance=distance*math.pow (10,5)#[m]
-        logger.info(f"距離:{distance}m")
-        logger.info("角度:" + "{:.3f}".format(degree))
+        log.write(f"距離:{distance}m","INFO")
+        log.write("角度:" + "{:.3f}".format(degree),"INFO")
 
         if degree <= -45:
-            motor.move("left", duty, 4*(-degree)/180)   #角度が大きければ大きいほど，曲がる量を多く
-            motor.move("straight", duty, sec)
+            motor.move("left", 4*(-degree)/180,duty=duty)   #角度が大きければ大きいほど，曲がる量を多く
+            motor.move("straight", sec,duty=duty)
         elif degree >= 45:
-            motor.move("right", duty, 4*degree/180)
-            motor.move("straight", duty, sec)
+            motor.move("right", 4*degree/180)
+            motor.move("straight", sec, duty=duty)
         else :#+-45
-            motor.move("straight", duty, sec)
+            motor.move("straight", sec, duty=duty)
 
 # sample
 #            move("right", duty, sec)

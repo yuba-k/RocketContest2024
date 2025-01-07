@@ -35,8 +35,8 @@ class Motor():
         self.right.start(0)
         self.left.start(0)
 
-    def move(self,direction,moter_active_time):
-        self.adjust_duty_cycle(direction)
+    def move(self,direction,moter_active_time,duty = self.duty):
+        self.adjust_duty_cycle(direction,duty)
 
         stop_time = time.time() + moter_active_time
         while time.time() < stop_time:
@@ -46,23 +46,23 @@ class Motor():
         self.right.ChangeDutyCycle(0)
         self.left.ChangeDutyCycle(0)
 
-    def adjust_duty_cycle(self,direction):
+    def adjust_duty_cycle(self,direction,duty):
         GPIO.output(self.right_phase,GPIO.HIGH)
         GPIO.output(self.left_phase,GPIO.HIGH)
         if direction == "forward":
             self.log.write("forward","INFO")
-            self.right_duty = self.left_duty = self.duty
+            self.right_duty = self.left_duty = duty
         elif direction == "right" or direction == "search":
             self.log.write("right","INFO")
-            self.right_duty = self.duty * 0.6
-            self.left_duty = self.duty
+            self.right_duty = duty * 0.6
+            self.left_duty = duty
         elif direction == "left":
             self.log.write("left","INFO")
-            self.right_duty = self.duty
-            self.left_duty = self.duty * 0.6
+            self.right_duty = duty
+            self.left_duty = duty * 0.6
         elif direction == "back":
             self.log.write("back","INFO")
-            self.right_duty = self.left_duty = self.duty
+            self.right_duty = self.left_duty = duty
             GPIO.output(self.right_phase,GPIO.LOW)
             GPIO.output(self.left_phase,GPIO.LOW)
         else:
