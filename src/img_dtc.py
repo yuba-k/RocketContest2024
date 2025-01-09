@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import configloading
+import camera2
+import motor
 
 
 class ImageDetection():
@@ -103,6 +105,8 @@ class ImageDetection():
 
         cv2.imwrite(f"../img/result/{cnt}result.jpg",img)
 
+        if  (coordinates_x["left"] - coordinates_x["right"])>=1000:
+            return "goal"
         return self.get_center_point(coordinates_x["left"],coordinates_x["right"],coordinates_x["top"])
 
     def get_center_point(self,right,left,top):
@@ -113,6 +117,7 @@ class ImageDetection():
             return "forward"
         else:
             return "right"
+
 
 def bgr_to_hsv(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -128,7 +133,16 @@ def rorate_img(img):
 
 def main():
     img_detection = ImageDetection()
-    img_detection.red_mask()
+    cam = camera2.Camera()
+    mt = motor.Motor()
+    while True:
+        img = cam.cap(cnt)
+        detc = img_detection.red_mask(cnt)
+        if(detx == goal):
+            mt.move("forward",2)
+            break
+        mt.move(detc,0.5)
+
 
 
 if __name__ == "__main__":
