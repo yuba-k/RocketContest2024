@@ -135,13 +135,15 @@ def main():
     img_detection = ImageDetection()
     cam = camera2.Camera()
     mt = motor.Motor()
+    cnt = 0#カウンタ
     while True:
         img = cam.cap(cnt)
-        detc = img_detection.red_mask(cnt)
-        if(detx == goal):
+        detc = img_detection.red_mask(img,cnt)
+        if(detc == "goal"):
             mt.move("forward",2)
             break
         mt.move(detc,0.5)
+        cnt += 1
 
 
 
