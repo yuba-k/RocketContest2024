@@ -35,7 +35,9 @@ class Motor():
         self.right.start(0)
         self.left.start(0)
 
-    def move(self,direction,moter_active_time,duty = self.duty):
+    def move(self,direction,moter_active_time,duty = None):
+        if duty == None:
+            duty = self.duty
         self.adjust_duty_cycle(direction,duty)
 
         stop_time = time.time() + moter_active_time
@@ -72,12 +74,7 @@ class Motor():
         GPIO.cleanup()
 
 def main():
-    #ConfigParserオブジェクトを生成
-    config = configparser.ConfigParser()
-
-    #設定ファイル読み込み
-    config.read("cansat_config.ini")
-    motor = Motor(config)
+    motor = Motor()
     print("forward,right,left")
     try:
         while True:
