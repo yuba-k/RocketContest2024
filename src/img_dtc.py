@@ -4,7 +4,6 @@ import configloading
 import camera2
 import motor
 
-
 class ImageDetection():
     def __init__(self):
         config = configloading.Config_reader()
@@ -118,7 +117,6 @@ class ImageDetection():
         else:
             return "right"
 
-
 def bgr_to_hsv(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -128,8 +126,6 @@ def get_coordinates(img):
 
 def rorate_img(img):
     return cv2.rotate(img,cv2.ROTATE_90_CLOCKWISE)
-
-
 
 def main():
     img_detection = ImageDetection()
@@ -144,8 +140,6 @@ def main():
             break
         mt.move(detc,0.5)
         cnt += 1
-
-
 
 if __name__ == "__main__":
     main()
