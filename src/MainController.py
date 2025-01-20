@@ -40,7 +40,7 @@ def main():
         log.write(condition,"INFO")
         start.awaiting()
 
-        thread.start_new_thread(stop_reqest, ())# 強制終了指示を待機
+        thread.start_new_thread(stop_reqest, ())# 強制終了命令を待機
 
         condition = Status.START.value
         fm.stringToAscii("ugokidasuyo-")
