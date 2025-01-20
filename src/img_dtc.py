@@ -134,6 +134,8 @@ def main():
     cnt = 0#カウンタ
     while True:
         img = cam.cap(cnt)
+        if(img == "PICAMERA-ERROR"):
+            return "ERROR"
         detc = img_detection.red_mask(img,cnt)
         if(detc == "goal"):
             mt.move("forward",2)
