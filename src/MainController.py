@@ -3,6 +3,7 @@ import logwrite
 import gps
 import img_dtc
 import WeakFMEmitter
+import move
 
 import time
 from enum import Enum
@@ -21,6 +22,7 @@ log = logwrite.MyLogging()
 fm = WeakFMEmitter.FMemitter()
 start.init()
 gps.init()
+mv = mote.Motor()
 
 flag = False
 
@@ -51,7 +53,13 @@ def main():
 
         condition = Status.CAMERAPhase.value
         log.write(condition,"INFO")
-        img_dtc.main()
+        while True:
+            direct = img_dtc.red_mask()
+            if direct == "goal":
+                mt.move("forward",5)
+                break
+            mt.move(direct,2)
+
         condition = Status.GOAL.value
         log.write(condition,"INFO")
 
