@@ -57,20 +57,18 @@ def main():
             direct = img_dtc.red_mask()
             if direct == "goal":
                 mt.move("forward",5)
+                condition = Status.GOAL.value
                 break
             mt.move(direct,2)
 
-        condition = Status.GOAL.value
         log.write(condition,"INFO")
 
         fm.stringToAscii("go-rusimasita")
     except KeyboardInterrupt:
         if flag:
-            log.write("強制終了","INFO")
+            log.write("強制終了-タイムアウト","INFO")
         else:
-            print("KeyboardInterrupt")
-    except SystemExit:
-        printf("強制終了させました")
+            log.write("KeyboardInterrupt","INFO")
     finally:
         pass
     
