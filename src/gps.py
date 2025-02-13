@@ -14,7 +14,7 @@ def main(mv):
     duty = 80
     
     #ゴールの座標をここに入力！
-    coordinate_goal = {'lat':30.374266, 'lon':130.960020}
+    coordinate_goal = {'lat':31.731545, 'lon':130.726183}
     log.write(f"coordinate_goal:{coordinate_goal}","INFO")
 
     coordinate_new = get_gpsdata()
@@ -67,12 +67,12 @@ def main(mv):
 
             if degree <= -45:
                 mv.move("left", 4*(-degree)/180,duty=duty)   #角度が大きければ大きいほど，曲がる量を多く
-                mv.move("straight", sec,duty=duty)
+                mv.move("forward", sec,duty=duty)
             elif degree >= 45:
                 mv.move("right", 4*degree/180)
-                mv.move("straight", sec, duty=duty)
+                mv.move("forward", sec, duty=duty)
             else :#+-45
-                mv.move("straight", sec, duty=duty)
+                mv.move("forward", sec, duty=duty)
         except KeyboardInterrupt:
             return
 # sample
