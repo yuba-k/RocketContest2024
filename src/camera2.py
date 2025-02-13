@@ -1,4 +1,4 @@
-from picamera2 import Picamera2, Picamera2Error
+from picamera2 import Picamera2
 import cv2
 import numpy as np
 
