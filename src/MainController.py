@@ -81,7 +81,7 @@ def main():
         else:
             log.write("SystemExit","WARNING")
     finally:
-        pass
+        mv.cleanup()
     
 if __name__ =="__main__":
     main()
