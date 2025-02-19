@@ -1,5 +1,8 @@
 import serial
 from typing import Optional, Tuple
+import math
+
+import logwrite
 
 class GPSModule:
     def __init__(self, port: str = "/dev/serial0", baud_rate: int = 9600):
@@ -11,20 +14,24 @@ class GPSModule:
         self.port = port
         self.baud_rate = baud_rate
         self.serial_connection = None
+        self.log = logwrite.MyLogging()
 
     def connect(self):
         """シリアル接続を初期化"""
         try:
             self.serial_connection = serial.Serial(self.port, self.baud_rate, timeout=1)
-            print("GPS module connected.")
+#            print("GPS module connected.")
+            self.log.write("GPS module connected.","INFO")
         except Exception as e:
+            self.log.write("Failed to connect to GPS module","WARNING")
             raise ConnectionError(f"Failed to connect to GPS module: {e}")
 
     def disconnect(self):
         """シリアル接続を閉じる"""
         if self.serial_connection:
             self.serial_connection.close()
-            print("GPS module disconnected.")
+#            print("GPS module disconnected.")
+            self.log.write("GPS module disconnected.","INFO")
 
     def parse_nmea_sentence(self, sentence: str) -> Tuple[Optional[float], Optional[float], Optional[int], Optional[str], Optional[float]]:
         """
@@ -83,6 +90,39 @@ class GPSModule:
         except Exception as e:
             print(f"Error while reading GPS data: {e}")
         return None, None, None, None, None
+
+def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_coordinate):
+    coordinate_diff_goal = {
+        "lat":(goal_coordinate["lat"]-current_coordinate["lat"]),
+        "lon":(goal_coordinate["lon"]-current_coordinate["lon"])
+    }
+    degree_for_goal = math.atan2(
+        coordinate_diff_goal["lon",coordinate_diff_goal["lat"]/math.pi*180]
+    )
+
+    coordinate_for_me = math.atan2(
+        coordinate_for_me["lon"],coordinate_for_me["lat"]/math.pi*180
+    )
+
+    degree = degree_for_goal - degree_for_me
+    degree = (degree + 360) if (degree < -180) else degree
+    dgeree = (degree - 360) if (180 < degree) else degree
+
+    distance = math.sqrt(coordinate_diff_goal["lat"] ** 2 + coordinate_diff_goal["lon"] ** 2) * math.pow(10,5)
+    log.write(f"Distance to target: {distance} m")
+    if distance <= 0.00005:
+        result = {"dir":"Immediate","deg":"0"}
+        return result
+    else:
+        if degree <= -45:
+            result = {"dir":"left","deg":degree}
+            return result
+        elif degree >= 45:
+            result = {"dir":"right","deg":degree}
+            return result
+        else:
+            result = {"dir":"forward","deg":degree}
+            return result
 
 # メインプログラム例
 if __name__ == "__main__":
