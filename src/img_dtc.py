@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
+import math
 import configloading
-import camera2
-import motor
+#import camera2
+#import motor
 
 class ImageDetection():
     def __init__(self):
@@ -127,21 +128,55 @@ def get_coordinates(img):
 def rorate_img(img):
     return cv2.rotate(img,cv2.ROTATE_90_CLOCKWISE)
 
+def bgr_to_lab(img):
+    return cv2.cvtColor(img,cv2.COLOR_BGR2LAB)
+
+def gamma_correction(img,gm):
+    lab = bgr_to_lab(img)#変換
+    l,a,b = cv2.split(lab)
+
+    mean_intensity = np.mean(l)
+    gamma = math.log(mean_intensity/255.0)/math.log(gm/255.0)
+    invGamma = 1.0/gamma
+    table = np.array([((i/255.0)**invGamma)*255 for i in np.arange(256)]).astype("uint8")
+    afImage = cv2.LUT(l,table)
+
+    lab_correveted = cv2.merge((afImage,a,b))
+
+    afImage = cv2.cvtColor(lab_correveted,cv2.COLOR_LAB2BGR)
+
+    return afImage
+
+def to_convert_HDR(img):
+    afimg = []
+    for gm in [5,147,200]:
+        afimg.append(gamma_correction(img,gm))
+    merge_mertens = cv2.createMergeMertens()
+    res_mertens = merge_mertens.process(afimg)
+    res_mertens_8bit = np.clip(res_mertens*255, 0, 255).astype('uint8')
+    mergeImg = np.hstack((img, res_mertens_8bit))
+    cv2.imshow("Befor_After",mergeImg)
+    cv2.waitKey(0)
+
 def main():
-    img_detection = ImageDetection()
-    cam = camera2.Camera()
-    mt = motor.Motor()
-    cnt = 0#カウンタ
-    while True:
-        img = cam.cap(cnt)
-        if(img == "PICAMERA-ERROR"):
-            return "ERROR"
-        detc = img_detection.red_mask(img,cnt)
-        if(detc == "goal"):
-            mt.move("forward",2)
-            break
-        mt.move(detc,0.5)
-        cnt += 1
+    # img_detection = ImageDetection()
+    # cam = camera2.Camera()
+    # mt = motor.Motor()
+    # cnt = 0#カウンタ
+    # while True:
+    #     img = cam.cap(cnt)
+    #     if(img == "PICAMERA-ERROR"):
+    #         return "ERROR"
+    #     detc = img_detection.red_mask(img,cnt)
+    #     if(detc == "goal"):
+    #         mt.move("forward",2)
+    #         break
+    #     mt.move(detc,0.5)
+    #     cnt += 1
+    for i in range(1,35):
+        img = cv2.imread(f"../img/backlight_selection/file({i}).jpg")
+        img = cv2.resize(img,dsize=(320,240))
+        to_convert_HDR(img)
 
 if __name__ == "__main__":
     main()
