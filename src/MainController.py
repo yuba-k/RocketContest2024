@@ -2,7 +2,7 @@ import start
 import logwrite
 import gps
 import img_dtc
-#import WeakFMEmitter
+import WeakFMEmitter
 import motor
 import camera2
 
@@ -20,7 +20,7 @@ class Status(Enum):
     GOAL = "GOAL"
 
 log = logwrite.MyLogging()
-#fm = WeakFMEmitter.FMemitter()
+fm = WeakFMEmitter.FMemitter()
 start.init()
 gps.init()
 mv = motor.Motor()
@@ -41,7 +41,7 @@ def stop_reqest():
 def main():
     cnt = 0
     try:
-#        fm.stringToAscii("taikityu-")
+        fm.transmitFMMessage("taikityu-")
         condition = Status.WAIT.value
         log.write(condition,"INFO")
         start.awaiting()
@@ -49,11 +49,11 @@ def main():
         _thread.start_new_thread(stop_reqest, ())# 強制終了命令を待機
 
         condition = Status.START.value
-#        fm.stringToAscii("ugokidasuyo-")
+        fm.transmitFMMessage("ugokidasuyo-")
         log.write(condition,"INFO")
 
         condition = Status.LOCATIONPhase.value
-#        gps.main(mv=mv)
+        gps.main(mv=mv)
 
         condition = Status.CAMERAPhase.value
         log.write(condition,"INFO")
@@ -64,12 +64,16 @@ def main():
                 mv.move("forward",5)
                 condition = Status.GOAL.value
                 break
-            mv.move(direct,2)
+            elif direct == "search":
+                fm.transmitFMMessage("sagashitemasu")
+                mv.move(direct,0.5)
+            else:
+                fm.transmitFMMessage(direct+"nisusumimasu")
+                mv.move(direct,1)
             cnt += 1
-
         log.write(condition,"INFO")
 
-#        fm.stringToAscii("go-rusimasita")
+        fm.transmitFMMessage("go-rusimasita")
     except KeyboardInterrupt:
         if flag:
             log.write("強制終了-タイムアウト","INFO")

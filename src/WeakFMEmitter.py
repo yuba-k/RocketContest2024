@@ -8,7 +8,7 @@ class FMemitter():
     def __init__(self):
         config = configloading.Config_reader()
         self.i2c = smbus.SMBus(1)
-        self.addr = config.reader("i2c","device_addr","intenger")
+        self.addr = config.reader("i2c","device_addr","intenger16")
 
     def stringToAscii(self,message):
         string = [int(hex(ord(s)),0) for s in message]

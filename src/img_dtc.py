@@ -104,7 +104,7 @@ class ImageDetection():
 
         cv2.imwrite(f"../img/result/{cnt}result.jpg",img)
 
-        if  (abs(coordinates_x["left"] - coordinates_x["right"]))>=1000:
+        if  (abs(coordinates_x["left"] - coordinates_x["right"]))>=self.width*0.8:
             return "goal"
         return self.get_center_point(coordinates_x["left"],coordinates_x["right"],coordinates_x["top"])
 
