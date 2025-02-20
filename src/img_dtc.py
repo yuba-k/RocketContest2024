@@ -13,7 +13,7 @@ class ImageDetection():
         self.width = config.reader("camera", "weight", "intenger")
 
     def red_mask(self,img,cnt):
-        self.img = img
+        self.img = to_convert_HDR(img)
 
         # 赤色のHSV範囲
         hsv_min1 = np.array([0, 100, 100])
@@ -154,9 +154,8 @@ def to_convert_HDR(img):
     merge_mertens = cv2.createMergeMertens()
     res_mertens = merge_mertens.process(afimg)
     res_mertens_8bit = np.clip(res_mertens*255, 0, 255).astype('uint8')
-    mergeImg = np.hstack((img, res_mertens_8bit))
-    cv2.imshow("Befor_After",mergeImg)
-    cv2.waitKey(0)
+#    mergeImg = np.hstack((img, res_mertens_8bit))
+    return res_mertens_8bit
 
 def main():
     # img_detection = ImageDetection()
@@ -173,10 +172,11 @@ def main():
     #         break
     #     mt.move(detc,0.5)
     #     cnt += 1
-    for i in range(1,35):
+    imgDetc = ImageDetection()
+    for i in range(1,38):
         img = cv2.imread(f"../img/backlight_selection/file({i}).jpg")
-        img = cv2.resize(img,dsize=(320,240))
-        to_convert_HDR(img)
+        img = cv2.resize(img,dsize = (640,460))
+        imgDetc.red_mask(img,i)
 
 if __name__ == "__main__":
     main()
