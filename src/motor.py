@@ -49,8 +49,8 @@ class Motor():
         self.left.ChangeDutyCycle(0)
 
     def adjust_duty_cycle(self,direction,duty):
-        GPIO.output(self.right_phase,GPIO.LOW)
-        GPIO.output(self.left_phase,GPIO.LOW)
+        GPIO.output(self.right_phase,GPIO.HIGH)
+        GPIO.output(self.left_phase,GPIO.HIGH)
         if direction == "forward":
             self.log.write("forward","INFO")
             self.right_duty = self.left_duty = duty
@@ -65,8 +65,8 @@ class Motor():
         elif direction == "back":
             self.log.write("back","INFO")
             self.right_duty = self.left_duty = duty
-            GPIO.output(self.right_phase,GPIO.HIGH)
-            GPIO.output(self.left_phase,GPIO.HIGH)
+            GPIO.output(self.right_phase,GPIO.LOW)
+            GPIO.output(self.left_phase,GPIO.LOW)
         else:
             self.right_duty = self.left_duty = 0
         

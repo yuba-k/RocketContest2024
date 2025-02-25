@@ -8,7 +8,7 @@ import logwrite
 import signal
 import configloading
 
-def main(mv):
+def main(mv,fm):
     log = logwrite.MyLogging()
     sec = 10
     duty = 80
@@ -68,11 +68,14 @@ def main(mv):
             if degree <= -45:
                 mv.move("left", 4*(-degree)/180,duty=duty)   #角度が大きければ大きいほど，曲がる量を多く
                 mv.move("forward", sec,duty=duty)
+                fm("hidari")
             elif degree >= 45:
                 mv.move("right", 4*degree/180)
                 mv.move("forward", sec, duty=duty)
+                fm("migi-")
             else :#+-45
                 mv.move("forward", sec, duty=duty)
+                fm("massugu")
         except KeyboardInterrupt:
             return
 # sample

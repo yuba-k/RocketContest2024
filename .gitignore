@@ -1,3 +1,5 @@
 doc/
 img/
 logs/
+test/
+src/__pycache__
