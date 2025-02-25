@@ -99,31 +99,36 @@ def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_
         "lon":(goal_coordinate["lon"]-current_coordinate["lon"])
     }
     degree_for_goal = math.atan2(
-        coordinate_diff_goal["lon"],coordinate_diff_goal["lat"]/math.pi*180
-    )
+        coordinate_diff_goal["lon"],coordinate_diff_goal["lat"]
+    ) / math.pi * 180
 
     coordinate_diff_me = { 'lat' : (current_coordinate['lat'] - previous_coordinate['lat']), 
                                     'lon' : (current_coordinate['lon'] - previous_coordinate['lon'])}
     degree_for_me = math.atan2(
-            coordinate_diff_me['lon'], coordinate_diff_me['lat']) / math.pi * 180
+        coordinate_diff_me['lon'], coordinate_diff_me['lat']
+    ) / math.pi * 180
     
 
     degree = degree_for_goal - degree_for_me
     degree = (degree + 360) if (degree < -180) else degree
     dgeree = (degree - 360) if (180 < degree) else degree
 
-    distance = math.sqrt(coordinate_diff_goal["lat"] ** 2 + coordinate_diff_goal["lon"] ** 2) * math.pow(10,5)
-    if distance <= 0.00005:
+    distance = math.sqrt(coordinate_diff_goal["lat"] ** 2 + coordinate_diff_goal["lon"] ** 2) * math.pow(10,5)#m単位で距離を表現
+    if distance <= 5:
+        #5m以内
         result = {"dir":"Immediate","deg":"0","distance":distance}
         return result
     else:
         if degree <= -45:
+            print(f"degree:{degree}")
             result = {"dir":"left","deg":degree,"distance":distance}
             return result
         elif degree >= 45:
+            print(f"degree:{degree}")
             result = {"dir":"right","deg":degree,"distance":distance}
             return result
         else:
+            print(f"degree:{degree}")
             result = {"dir":"forward","deg":degree,"distance":distance}
             return result
 
