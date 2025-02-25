@@ -13,4 +13,6 @@ class Config_reader():
             var = int(var)
         elif style == "character":
             var = str(var)
+        elif style == "float":
+            var = float(var)
         return var

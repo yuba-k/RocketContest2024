@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import math
 import configloading
-#import camera2
-#import motor
+# import camera2
+# import motor
 
 class ImageDetection():
     def __init__(self):
@@ -44,9 +44,9 @@ class ImageDetection():
         _,img = cv2.threshold(gray,0,255,cv2.THRESH_OTSU)# 入力画像（グレースケール画像を指定すること）# 閾値 # 閾値を超えた画素に割り当てる値# 閾値処理方法
         neiborhood = np.array([[0, 1, 0],[1, 1, 1],[0, 1, 0]],np.uint8)
         # 収縮
-        img_erode = cv2.erode(img,neiborhood,iterations=10)
+        img_erode = cv2.erode(img,neiborhood,iterations=2)
         # 膨張
-        img_dilate = cv2.dilate(img_erode,neiborhood,iterations=10)
+        img_dilate = cv2.dilate(img_erode,neiborhood,iterations=2)
         cv2.imwrite("../img/result/opening.jpg",img_dilate)
         img = self.filter(img_dilate)
         if img is None:
@@ -154,7 +154,6 @@ def to_convert_HDR(img):
     merge_mertens = cv2.createMergeMertens()
     res_mertens = merge_mertens.process(afimg)
     res_mertens_8bit = np.clip(res_mertens*255, 0, 255).astype('uint8')
-#    mergeImg = np.hstack((img, res_mertens_8bit))
     return res_mertens_8bit
 
 def main():

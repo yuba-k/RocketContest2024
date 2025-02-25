@@ -1,5 +1,6 @@
 import logging
 import logging.config
+import csv
 
 class MyLogging():
     def __init__(self):
@@ -18,6 +19,11 @@ class MyLogging():
             self.logger.error(f"{logmessage}")
         elif loglevel=="CRITICAL":
             self.logger.critical(f"{logmessage}")
+
+def forCSV(lat,lon):
+    with open("../config/gpslog.csv","a") as f:
+        wrt = csv.writer(f)
+        wrt.writerow([lat,lon])
 
 def main():
     log = MyLogging()

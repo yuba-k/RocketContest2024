@@ -23,7 +23,7 @@ class GPSModule:
 #            print("GPS module connected.")
             self.log.write("GPS module connected.","INFO")
         except Exception as e:
-            self.log.write("Failed to connect to GPS module","WARNING")
+            self.log.write("Failed to connect to GPS module","INFO")
             raise ConnectionError(f"Failed to connect to GPS module: {e}")
 
     def disconnect(self):
@@ -78,6 +78,7 @@ class GPSModule:
         :return: (緯度, 経度, 衛星数, 時刻)
         """
         if not self.serial_connection:
+            self.log.write("GPS module is not connected.","INFO")
             raise ConnectionError("GPS module is not connected.")
         
         try:
@@ -85,6 +86,7 @@ class GPSModule:
                 line = self.serial_connection.readline().decode('ascii', errors='replace').strip()
                 if line.startswith("$GPGGA"):
                     return self.parse_nmea_sentence(line)
+                self.serial_connection.reset_input_buffer()
         except KeyboardInterrupt:
             print("\nGPS data fetching stopped by user.")
         except Exception as e:
@@ -97,31 +99,32 @@ def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_
         "lon":(goal_coordinate["lon"]-current_coordinate["lon"])
     }
     degree_for_goal = math.atan2(
-        coordinate_diff_goal["lon",coordinate_diff_goal["lat"]/math.pi*180]
+        coordinate_diff_goal["lon"],coordinate_diff_goal["lat"]/math.pi*180
     )
 
-    coordinate_for_me = math.atan2(
-        coordinate_for_me["lon"],coordinate_for_me["lat"]/math.pi*180
-    )
+    coordinate_diff_me = { 'lat' : (current_coordinate['lat'] - previous_coordinate['lat']), 
+                                    'lon' : (current_coordinate['lon'] - previous_coordinate['lon'])}
+    degree_for_me = math.atan2(
+            coordinate_diff_me['lon'], coordinate_diff_me['lat']) / math.pi * 180
+    
 
     degree = degree_for_goal - degree_for_me
     degree = (degree + 360) if (degree < -180) else degree
     dgeree = (degree - 360) if (180 < degree) else degree
 
     distance = math.sqrt(coordinate_diff_goal["lat"] ** 2 + coordinate_diff_goal["lon"] ** 2) * math.pow(10,5)
-    log.write(f"Distance to target: {distance} m")
     if distance <= 0.00005:
-        result = {"dir":"Immediate","deg":"0"}
+        result = {"dir":"Immediate","deg":"0","distance":distance}
         return result
     else:
         if degree <= -45:
-            result = {"dir":"left","deg":degree}
+            result = {"dir":"left","deg":degree,"distance":distance}
             return result
         elif degree >= 45:
-            result = {"dir":"right","deg":degree}
+            result = {"dir":"right","deg":degree,"distance":distance}
             return result
         else:
-            result = {"dir":"forward","deg":degree}
+            result = {"dir":"forward","deg":degree,"distance":distance}
             return result
 
 # メインプログラム例
@@ -138,7 +141,7 @@ if __name__ == "__main__":
                 # ロギングを追加する場合、以下に記述
             # Example: log_to_file(lat, lon, satellites, time_utc, dop)
             else:
-                break
+                print("Waiting")
     except KeyboardInterrupt:
         print("Terminating program.")
     finally:

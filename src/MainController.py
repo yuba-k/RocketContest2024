@@ -1,6 +1,6 @@
 import start
 import logwrite
-import gpsnew
+#import gpsnew
 import img_dtc
 import WeakFMEmitter
 import motor
@@ -22,11 +22,11 @@ class Status(Enum):
 
 log = logwrite.MyLogging()
 fm = WeakFMEmitter.FMemitter()
-gps = gpsnew.GPSModule()
+#gps = gpsnew.GPSModule()
 config = configloading.Config_reader()
 
 start.init()
-gps.connect()
+#gps.connect()
 mv = motor.Motor()
 img = img_dtc.ImageDetection()
 cm = camera2.Camera()
@@ -55,29 +55,53 @@ def main():
         condition = Status.START.value
         fm.transmitFMMessage("ugokidasuyo-")
         log.write(condition,"INFO")
-        #GPSフェーズ
-        condition = Status.LOCATIONPhase.value
-        goal = {"lat":config.reader("GOAL","lat","intenger"),"lon":config.reader("GOAL","lon","intenger")}#目標座標の読み込み
-        lat, lon, satellites, utc_time, dop = gps.get_gps_data()
-        log.write(f"Latitude:{lat},Longitude:{lon},Satellites:{satellites},Time:{utc_time},DOP{dop}","INFO")
-        current_coordinate = {"lat":lat,"lon":lon}
-        mv.move("forward",7)
-        while True:
-            previous_coordinate = current_coordinate
-            lat, lon, satellites, utc_time, dop = gps.get_gps_data()
-            log.write(f"Latitude:{lat},Longitude:{lon},Satellites:{satellites},Time:{utc_time},DOP{dop}","INFO")
-            current_coordinate = {"lat":lat,"lon":lon}
-            result = gps.calculate_target_distance_angle(current_coordinate,previous_coordinate,goal)
-            if (result["dir"] != "Immediate"):
-                if result["dir"] == "forward":
-                    pass
-                elif result["dir"] == "left":
-                    mv.move("left",4*(-result["deg"])/180)
-                else:
-                    mv.move("left",4*(-result["deg"])/180)
-                mt.move("forward",10)
-            else:
-                break
+
+        # # #GPSフェーズ
+        # condition = Status.LOCATIONPhase.value
+        # goal = {"lat":config.reader("GOAL","lat","float"),"lon":config.reader("GOAL","lon","float")}#目標座標の読み込み
+        # while True:
+        #     try:
+        #         log.write("waiting for catching GPS-Date","DEBUG")
+        #         lat, lon, satellites, utc_time, dop = gps.get_gps_data()
+        #         if lat is not None and lon is not None:
+        #             break
+        #     except KeyboardInterrupt:
+        #         break
+        #     time.sleep(1)
+        # log.write(f"Latitude:{lat},Longitude:{lon},Satellites:{satellites},Time:{utc_time},DOP{dop}","INFO")
+        # logwrite.forCSV(lat,lon)
+        # current_coordinate = {"lat":lat,"lon":lon}
+        # mv.move("forward",7)
+        # while True:
+        #     previous_coordinate = current_coordinate
+        #     while True:
+        #         try:
+        #             log.write("waiting for catching GPS-Date","DEBUG")
+        #             lat, lon, satellites, utc_time, dop = gps.get_gps_data()
+        #             if lat is not None and lon is not None:
+        #                 break
+        #         except KeyboardInterrupt:
+        #             break
+        #         time.sleep(1)
+        #     log.write(f"Latitude:{lat},Longitude:{lon},Satellites:{satellites},Time:{utc_time},DOP{dop}","INFO")
+        #     logwrite.forCSV(lat,lon)
+        #     current_coordinate = {"lat":lat,"lon":lon}
+        #     result = gpsnew.calculate_target_distance_angle(current_coordinate,previous_coordinate,goal)
+        #     log.write(f"Distance:{result['distance']}","INFO")
+        #     if (result["dir"] != "Immediate"):
+        #         if result["dir"] == "forward":
+        #             fm.transmitFMMessage("mae")
+        #             pass
+        #         elif result["dir"] == "left":
+        #             mv.move("left",4*(-result["deg"])/180)
+        #             fm.transmitFMMessage("hidari")
+        #         else:
+        #             mv.move("left",4*(-result["deg"])/180)
+        #             fm.transmitFMMessage("migi")
+        #         mv.move("forward",10)
+        #     else:
+        #         break
+        #画像処理フェーズ
         condition = Status.CAMERAPhase.value
         log.write(condition,"INFO")
         while True:
@@ -91,7 +115,7 @@ def main():
                 fm.transmitFMMessage("sagashitemasu")
                 mv.move(direct,0.5)
             else:
-                fm.transmitFMMessage(direct+"nisusumimasu")
+                fm.transmitFMMessage("mituketa")
                 mv.move(direct,1)
             cnt += 1
         log.write(condition,"INFO")
@@ -109,7 +133,8 @@ def main():
             log.write("SystemExit","WARNING")
     finally:
         mv.cleanup()
-        gps.disconnect()
+#        gps.disconnect()
+        log.write("All phase was finished.","INFO")
     
 if __name__ =="__main__":
     main()
