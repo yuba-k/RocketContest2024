@@ -68,14 +68,14 @@ def main(mv,fm):
             if degree <= -45:
                 mv.move("left", 4*(-degree)/180,duty=duty)   #角度が大きければ大きいほど，曲がる量を多く
                 mv.move("forward", sec,duty=duty)
-                fm("hidari")
+                fm.transmitFMMessage("hidari")
             elif degree >= 45:
                 mv.move("right", 4*degree/180)
                 mv.move("forward", sec, duty=duty)
-                fm("migi-")
+                fm.transmitFMMessage("migi-")
             else :#+-45
                 mv.move("forward", sec, duty=duty)
-                fm("massugu")
+                fm.transmitFMMessage("massugu")
         except KeyboardInterrupt:
             return
 # sample
