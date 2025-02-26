@@ -73,7 +73,7 @@ def main():
         current_coordinate = {"lat":lat,"lon":lon}
         mv.move("forward",7)
         while True:
-            previous_coordinate = current_coordinate
+            previous_coordinate = current_coordinate.copy()
             while True:
                 try:
                     log.write("waiting for catching GPS-Date","DEBUG")
@@ -86,17 +86,21 @@ def main():
             log.write(f"Latitude:{lat},Longitude:{lon},Satellites:{satellites},Time:{utc_time},DOP{dop}","INFO")
             logwrite.forCSV(lat,lon)
             current_coordinate = {"lat":lat,"lon":lon}
+
+            log.write(f"previous_coordinate:{previous_coordinate},current_coordinate{current_coordinate}","DEBUG")
+
             result = gpsnew.calculate_target_distance_angle(current_coordinate,previous_coordinate,goal)
-            log.write(f"Distance:{result['distance']}","INFO")
+            log.write(f"Distance:{result['distance']},Degree:{result['deg']}","INFO")
             if (result["dir"] != "Immediate"):
                 if result["dir"] == "forward":
                     fm.transmitFMMessage("mae")
-                    pass
                 elif result["dir"] == "left":
-                    mv.move("left",4*(-result["deg"])/180)
+#                    mv.move("left",4*(-result["deg"])/180)
+                    mv.move("left",6)
                     fm.transmitFMMessage("hidari")
                 else:
-                    mv.move("right",4*(result["deg"])/180)
+#                    mv.move("right",4*(result["deg"])/180)
+                    mv.move("right",6)
                     fm.transmitFMMessage("migi")
                 mv.move("forward",10)
             else:
