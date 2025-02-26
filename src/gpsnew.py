@@ -20,7 +20,6 @@ class GPSModule:
         """シリアル接続を初期化"""
         try:
             self.serial_connection = serial.Serial(self.port, self.baud_rate, timeout=1)
-#            print("GPS module connected.")
             self.log.write("GPS module connected.","INFO")
         except Exception as e:
             self.log.write("Failed to connect to GPS module","INFO")
@@ -30,7 +29,6 @@ class GPSModule:
         """シリアル接続を閉じる"""
         if self.serial_connection:
             self.serial_connection.close()
-#            print("GPS module disconnected.")
             self.log.write("GPS module disconnected.","INFO")
 
     def parse_nmea_sentence(self, sentence: str) -> Tuple[Optional[float], Optional[float], Optional[int], Optional[str], Optional[float]]:
@@ -94,21 +92,28 @@ class GPSModule:
         return None, None, None, None, None
 
 def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_coordinate):
+#    log = logwrite.MyLogging()
     coordinate_diff_goal = {
         "lat":(goal_coordinate["lat"]-current_coordinate["lat"]),
         "lon":(goal_coordinate["lon"]-current_coordinate["lon"])
     }
+
     degree_for_goal = math.atan2(
         coordinate_diff_goal["lon"],coordinate_diff_goal["lat"]
     ) / math.pi * 180
+
+#    log.write(f"degree_for_goal:{degree_for_goal}","DEGUB")
 
     coordinate_diff_me = { 'lat' : (current_coordinate['lat'] - previous_coordinate['lat']), 
                                     'lon' : (current_coordinate['lon'] - previous_coordinate['lon'])}
     degree_for_me = math.atan2(
         coordinate_diff_me['lon'], coordinate_diff_me['lat']
-    ) / math.pi * 180
-    
+    ) / math.pi * 180  
 
+#    log.write(f"degree_for_me:{degree_for_me}","DEGUB")
+
+    logwrite.forLATLON(degree_for_goal,degree_for_me)
+    
     degree = degree_for_goal - degree_for_me
     degree = (degree + 360) if (degree < -180) else degree
     dgeree = (degree - 360) if (180 < degree) else degree
@@ -120,15 +125,15 @@ def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_
         return result
     else:
         if degree <= -45:
-            print(f"degree:{degree}")
+#            log.write(f"degree:{degree},LEFT","DEBUG")
             result = {"dir":"left","deg":degree,"distance":distance}
             return result
         elif degree >= 45:
-            print(f"degree:{degree}")
+#            log.write(f"degree:{degree},RIGHT","DEBUG")
             result = {"dir":"right","deg":degree,"distance":distance}
             return result
         else:
-            print(f"degree:{degree}")
+#            log.write(f"degree:{degree},FORWARD","DEBUG")
             result = {"dir":"forward","deg":degree,"distance":distance}
             return result
 
