@@ -1,6 +1,7 @@
 import logging
 import logging.config
 import csv
+import datetime
 
 class MyLogging():
     def __init__(self):
@@ -21,9 +22,13 @@ class MyLogging():
             self.logger.critical(f"{logmessage}")
 
 def forCSV(lat,lon):
-    with open("../config/gpslog.csv","a") as f:
+    with open("../logs/gpslog.csv","a") as f:
         wrt = csv.writer(f)
-        wrt.writerow([lat,lon])
+        wrt.writerow([datetime.datetime.now(),lat,lon])
+def forLATLON(temp1,temp2):
+    with open("../logs/degree.csv","a") as f:
+        wrt = csv.writer(f)
+        wrt.writerow([datetime.datetime.now(),temp1,temp2])
 
 def main():
     log = MyLogging()
