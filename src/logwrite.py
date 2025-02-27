@@ -21,6 +21,12 @@ class MyLogging():
         elif loglevel=="CRITICAL":
             self.logger.critical(f"{logmessage}")
 
+def init():
+    with open("../logs/gpslog.csv","w") as f:
+        pass
+    with open("../logs/degree.csv","w") as f:
+        pass
+
 def forCSV(lat,lon):
     with open("../logs/gpslog.csv","a") as f:
         wrt = csv.writer(f)
