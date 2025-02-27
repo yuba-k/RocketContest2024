@@ -116,8 +116,8 @@ def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_
     
     degree = degree_for_goal - degree_for_me
     degree = (degree + 360) if (degree < -180) else degree
-    dgeree = (degree - 360) if (180 < degree) else degree
-
+    degree = (degree - 360) if (180 < degree) else degree
+   
     distance = math.sqrt(coordinate_diff_goal["lat"] ** 2 + coordinate_diff_goal["lon"] ** 2) * math.pow(10,5)#m単位で距離を表現
     if distance <= 5:
         #5m以内
