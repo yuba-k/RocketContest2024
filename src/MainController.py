@@ -29,7 +29,10 @@ start.init()
 gps.connect()
 mv = motor.Motor()
 img = img_dtc.ImageDetection()
-cm = camera2.Camera()
+try:
+    cm = camera2.Camera()
+except Exception as e:
+    log.write(e,"ERROR")
 
 flag = False
 
@@ -56,7 +59,7 @@ def main():
         fm.transmitFMMessage("ugokidasuyo-")
         log.write(condition,"INFO")
 
-        # # #GPSフェーズ
+        # GPSフェーズ
         condition = Status.LOCATIONPhase.value
         goal = {"lat":config.reader("GOAL","lat","float"),"lon":config.reader("GOAL","lon","float")}#目標座標の読み込み
         while True:
@@ -78,7 +81,7 @@ def main():
                 try:
                     log.write("waiting for catching GPS-Date","DEBUG")
                     lat, lon, satellites, utc_time, dop = gps.get_gps_data()
-                    if lat is not None and lon is not None:
+                    if (lat is not None and lon is not None) or list(current_coordinate.values) != list(previous_coordinate.values):
                         break
                 except KeyboardInterrupt:
                     break
@@ -91,17 +94,17 @@ def main():
 
             result = gpsnew.calculate_target_distance_angle(current_coordinate,previous_coordinate,goal)
             log.write(f"Distance:{result['distance']},Degree:{result['deg']}","INFO")
+            fm.transmitFMMessage(f"<NUM VAR={int(result['distance'])}>,me-toru.")
+            fm.transmitFMMessage(f"kaito-,<NUM VAR={int(result['deg'])}>,do")
             if (result["dir"] != "Immediate"):
                 if result["dir"] == "forward":
                     fm.transmitFMMessage("mae")
                 elif result["dir"] == "left":
-#                    mv.move("left",4*(-result["deg"])/180)
-                    mv.move("left",6)
-                    fm.transmitFMMessage("hidari")
+                    fm.transmitFMMessage("hidari,hemukaimasu")
+                    mv.move("left",15*(-result["deg"])/180)
                 else:
-#                    mv.move("right",4*(result["deg"])/180)
-                    mv.move("right",6)
-                    fm.transmitFMMessage("migi")
+                    fm.transmitFMMessage("migi,hemukaimasu")
+                    mv.move("right",15*(result["deg"])/180)
                 mv.move("forward",10)
             else:
                 break
@@ -110,18 +113,21 @@ def main():
         log.write(condition,"INFO")
         while True:
             im = cm.cap(cnt)
-            direct = img.red_mask(im,cnt)
-            if direct == "goal":
-                mv.move("forward",5)
-                condition = Status.GOAL.value
-                break
-            elif direct == "search":
-                fm.transmitFMMessage("sagashitemasu")
-                mv.move(direct,0.5)
+            if im is not None:
+                direct = img.red_mask(im,cnt)
+                if direct == "goal":
+                    mv.move("forward",5)
+                    condition = Status.GOAL.value
+                    break
+                elif direct == "search":
+                    fm.transmitFMMessage("sagashitemasu")
+                    mv.move(direct,0.5)
+                else:
+                    fm.transmitFMMessage("mituketa")
+                    mv.move(direct,1)
+                cnt += 1
             else:
-                fm.transmitFMMessage("mituketa")
-                mv.move(direct,1)
-            cnt += 1
+                fm.transmitFMMessage("satuedekinaiyo!")
         log.write(condition,"INFO")
 
         fm.transmitFMMessage("go-rusimasita")
@@ -135,9 +141,12 @@ def main():
             log.write("SystemExit-強制終了","INFO")
         else:
             log.write("SystemExit","WARNING")
+    except Exception as e:
+        log.write(e,"ERROR")
     finally:
         mv.cleanup()
         gps.disconnect()
+        cm.disconnect()
         log.write("All phase was finished.","INFO")
     
 if __name__ =="__main__":
