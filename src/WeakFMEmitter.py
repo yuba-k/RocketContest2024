@@ -16,12 +16,15 @@ class FMemitter():
 
     def sendDataViaI2C(self,string):
         self.i2c.write_i2c_block_data(self.addr,0,string)
-        time.sleep(0.1)
+        time.sleep(0.5)
         self.i2c.write_byte_data(self.addr,0,0x0d)#終了コード
 
     def transmitFMMessage(self,message):
-        string = self.stringToAscii(message)
-        self.sendDataViaI2C(string)
+        msg = message.split(",")
+        for string in msg:
+            string = self.stringToAscii(message)
+            self.sendDataViaI2C(string)
+            time.sleep(0.5)
 
 def main():
     while(True):
