@@ -140,18 +140,25 @@ def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_
 # メインプログラム例
 if __name__ == "__main__":
     gps = GPSModule()
-
+    log = logwrite.MyLogging()
     try:
         gps.connect()
         print("Fetching GPS data...")
         while True:
-            lat, lon, satellites, utc_time, dop = gps.get_gps_data()
-            if lat is not None and lon is not None:
-                print(f"Latitude: {lat:.6f}, Longitude: {lon:.6f}, Satellites: {satellites}, Time: {utc_time}, DOP: {dop}")
-                # ロギングを追加する場合、以下に記述
-            # Example: log_to_file(lat, lon, satellites, time_utc, dop)
-            else:
-                print("Waiting")
+            try:
+                lat, lon, satellites, utc_time, dop = gps.get_gps_data()
+                if lat is not None and lon is not None:
+                    log.write(f"Latitude: {lat:.6f}, Longitude: {lon:.6f}, Satellites: {satellites}, Time: {utc_time}, DOP: {dop}","INFO")
+                    logwrite.forCSV(lat,lon)
+                    # ロギングを追加する場合、以下に記述
+                # Example: log_to_file(lat, lon, satellites, time_utc, dop)
+                else:
+                    print("Waiting")
+                    logwrite.forCSV(lat,lon)
+            except KeyboardInterrupt:
+                break
+            except Exception as e:
+                log.write(e,"CRITICAL")
     except KeyboardInterrupt:
         print("Terminating program.")
     finally:
