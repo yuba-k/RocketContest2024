@@ -20,11 +20,13 @@ class Status(Enum):
     CAMERAPhase = "search_with_CAMERA"
     GOAL = "GOAL"
 
+#オブジェクトの生成
 log = logwrite.MyLogging()
 fm = WeakFMEmitter.FMemitter()
 gps = gpsnew.GPSModule()
 config = configloading.Config_reader()
 
+#各モジュールの初期化
 start.init()
 gps.connect()
 mv = motor.Motor()
@@ -34,14 +36,17 @@ try:
 except Exception as e:
     log.write(e,"ERROR")
 
-flag = False
+#大域変数の設定
+GOAL = {"lat":config.reader("GOAL","lat","float"),"lon":config.reader("GOAL","lon","float")}
+Initial_Destination = {"lat":GOAL["lat"]-0.000200,"lon":GOAL["lon"]+0.000200}
+FLAG = False
 
 def stop_reqest():
-    global flag
+    global FLAG
     finish_time = time.time() + (18 * 60)#強制終了
     while True:
         if(time.time()>=finish_time):
-            flag = True
+            FLAG = True
             _thread.interrupt_main()
         time.sleep(5)
 
@@ -61,7 +66,7 @@ def main():
 
         # # GPSフェーズ
         condition = Status.LOCATIONPhase.value
-        goal = {"lat":config.reader("GOAL","lat","float"),"lon":config.reader("GOAL","lon","float")}#目標座標の読み込み
+        #初期位置の決定
         while True:
             try:
                 log.write("waiting for catching GPS-Date","DEBUG")
@@ -75,6 +80,7 @@ def main():
         logwrite.forCSV(lat,lon)
         current_coordinate = {"lat":lat,"lon":lon}
         mv.move("forward",7)
+        #初期目標地点へ接近開始
         while True:
             previous_coordinate = current_coordinate.copy()
             while True:
@@ -94,7 +100,41 @@ def main():
 
             log.write(f"previous_coordinate:{previous_coordinate},current_coordinate{current_coordinate}","DEBUG")
 
-            result = gpsnew.calculate_target_distance_angle(current_coordinate,previous_coordinate,goal)
+            result = gpsnew.calculate_target_distance_angle(current_coordinate,previous_coordinate,Initial_Destination)
+            log.write(f"Distance:{result['distance']},Degree:{result['deg']}","INFO")
+            if (result["dir"] != "Immediate"):
+                if result["dir"] == "forward":
+                    fm.transmitFMMessage("zensin")
+                elif result["dir"] == "left":
+                    fm.transmitFMMessage("hidari")
+                    mv.move("left",8*(-result["deg"])/180)
+                else:
+                    fm.transmitFMMessage("migi")
+                    mv.move("right",8*(result["deg"])/180)
+                mv.move("forward",15)
+            else:
+                break
+        #ゴールへ接近開始
+        while True:
+            previous_coordinate = current_coordinate.copy()
+            while True:
+                try:
+                    log.write("waiting for catching GPS-Date","DEBUG")
+                    lat, lon, satellites, utc_time, dop = gps.get_gps_data()
+                    if gpsnew.cheak_data(lat,lon,previous_coordinate):
+                        break
+                    else:
+                        log.write("再取得","INFO")
+                except KeyboardInterrupt:
+                    break
+                time.sleep(1)
+            log.write(f"Latitude:{lat},Longitude:{lon},Satellites:{satellites},Time:{utc_time},DOP{dop}","INFO")
+            logwrite.forCSV(lat,lon)
+            current_coordinate = {"lat":lat,"lon":lon}
+
+            log.write(f"previous_coordinate:{previous_coordinate},current_coordinate{current_coordinate}","DEBUG")
+
+            result = gpsnew.calculate_target_distance_angle(current_coordinate,previous_coordinate,GOAL)
             log.write(f"Distance:{result['distance']},Degree:{result['deg']}","INFO")
             if (result["dir"] != "Immediate"):
                 if result["dir"] == "forward":
@@ -132,12 +172,12 @@ def main():
 
         fm.transmitFMMessage("go-rusimasita")
     except KeyboardInterrupt:
-        if flag:
+        if FLAG:
             log.write("強制終了-タイムアウト","INFO")
         else:
             log.write("KeyboardInterrupt","INFO")
     except SystemExit:
-        if flag:
+        if FLAG:
             log.write("SystemExit-強制終了","INFO")
         else:
             log.write("SystemExit","WARNING")
