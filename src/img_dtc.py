@@ -65,8 +65,8 @@ class ImageDetection():
             max_cnt = max(contours, key=lambda x: cv2.contourArea(x))
         # 黒い画像に一番大きい輪郭だけ塗りつぶして描画する
         out = np.zeros_like(img)
-        cv2.drawContours(img, [max_cnt], -1, color=255, thickness=-1)
-        return img
+        cv2.drawContours(out, [max_cnt], -1, color=255, thickness=-1)
+        return out
 
     def get_target_point(self,img,cnt):
         coordinates_x = {}
