@@ -86,9 +86,9 @@ class GPSModule:
                     return self.parse_nmea_sentence(line)
                 self.serial_connection.reset_input_buffer()
         except KeyboardInterrupt:
-            print("\nGPS data fetching stopped by user.")
+            self.log.write("GPS data fetching stopped by user.")
         except Exception as e:
-            print(f"Error while reading GPS data: {e}")
+            self.log.write("Error while reading GPS data: {e}")
         return None, None, None, None, None
 
 def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_coordinate):
@@ -137,6 +137,17 @@ def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_
             result = {"dir":"forward","deg":degree,"distance":distance}
             return result
 
+def cheak_data(lat,lon,previous_coordinate):
+    if (lat is not None and lon is not None):
+        return True
+    elif (abs(previous_coordinate['lat'] - lat) >= 0.000003) and (abs(previous_coordinate['lon'] - lon) >= 0.000003):
+        if(abs(previous_coordinate['lat'] - lat) <= 0.000050) and (abs(previous_coordinate['lon'] - lon) <= 0.000050):
+            return True
+        else:
+            return False
+    else:
+        return False
+
 # メインプログラム例
 if __name__ == "__main__":
     gps = GPSModule()
@@ -161,6 +172,8 @@ if __name__ == "__main__":
                 log.write(e,"CRITICAL")
     except KeyboardInterrupt:
         print("Terminating program.")
+    except Exception as e :
+        log.write(e,"ERROR")
     finally:
         gps.disconnect()
 
