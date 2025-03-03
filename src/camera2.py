@@ -15,7 +15,7 @@ class Camera():
             self.picam = Picamera2()
             self.picam.configure(self.picam.create_still_configuration(main={"format":"RGB888","size":(weight,height)}))
         except Exception as e:
-            self.log.write("初期化時にエラーが発生","ERROR")
+            self.log.write("Camera初期化時にエラーが発生","ERROR")
             raise
     def cap(self,cnt):
         try:
