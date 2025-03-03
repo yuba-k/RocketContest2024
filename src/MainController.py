@@ -43,7 +43,7 @@ def stop_reqest():
         if(time.time()>=finish_time):
             flag = True
             _thread.interrupt_main()
-        time.sleep(1)
+        time.sleep(5)
 
 def main():
     cnt = 0
@@ -59,14 +59,14 @@ def main():
         fm.transmitFMMessage("ugokidasuyo-")
         log.write(condition,"INFO")
 
-        # GPSフェーズ
+        # # GPSフェーズ
         condition = Status.LOCATIONPhase.value
         goal = {"lat":config.reader("GOAL","lat","float"),"lon":config.reader("GOAL","lon","float")}#目標座標の読み込み
         while True:
             try:
                 log.write("waiting for catching GPS-Date","DEBUG")
                 lat, lon, satellites, utc_time, dop = gps.get_gps_data()
-                if lat is not None and lon is not None:
+                if (lat is not None and lon is not None):
                     break
             except KeyboardInterrupt:
                 break
@@ -81,8 +81,10 @@ def main():
                 try:
                     log.write("waiting for catching GPS-Date","DEBUG")
                     lat, lon, satellites, utc_time, dop = gps.get_gps_data()
-                    if (lat is not None and lon is not None) or list(current_coordinate.values) != list(previous_coordinate.values):
+                    if gpsnew.cheak_data(lat,lon,previous_coordinate):
                         break
+                    else:
+                        log.write("再取得","INFO")
                 except KeyboardInterrupt:
                     break
                 time.sleep(1)
@@ -94,18 +96,16 @@ def main():
 
             result = gpsnew.calculate_target_distance_angle(current_coordinate,previous_coordinate,goal)
             log.write(f"Distance:{result['distance']},Degree:{result['deg']}","INFO")
-            fm.transmitFMMessage(f"<NUM VAR={int(result['distance'])}>,me-toru.")
-            fm.transmitFMMessage(f"kaito-,<NUM VAR={int(result['deg'])}>,do")
             if (result["dir"] != "Immediate"):
                 if result["dir"] == "forward":
-                    fm.transmitFMMessage("mae")
+                    fm.transmitFMMessage("zensin")
                 elif result["dir"] == "left":
-                    fm.transmitFMMessage("hidari,hemukaimasu")
-                    mv.move("left",15*(-result["deg"])/180)
+                    fm.transmitFMMessage("hidari")
+                    mv.move("left",8*(-result["deg"])/180)
                 else:
-                    fm.transmitFMMessage("migi,hemukaimasu")
-                    mv.move("right",15*(result["deg"])/180)
-                mv.move("forward",10)
+                    fm.transmitFMMessage("migi")
+                    mv.move("right",8*(result["deg"])/180)
+                mv.move("forward",15)
             else:
                 break
         #画像処理フェーズ
