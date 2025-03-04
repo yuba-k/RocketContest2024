@@ -54,7 +54,7 @@ class Motor():
         GPIO.output(self.right_phase,GPIO.HIGH)
         GPIO.output(self.left_phase,GPIO.HIGH)
         if direction == "forward":
-            self.log.write("forward","INFO")
+            self.log.write(f"forward,Duty:{self.duty}","INFO")
             self.right_duty = duty * 1.0
             self.left_duty = duty
         elif direction == "right" or direction == "search":
