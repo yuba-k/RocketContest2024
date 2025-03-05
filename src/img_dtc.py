@@ -7,12 +7,13 @@ import configloading
 
 class ImageDetection():
     def __init__(self):
-        config = configloading.Config_reader()
-
-        self.height = config.reader("camera", "height", "intenger")
-        self.width = config.reader("camera", "weight", "intenger")
+        self.config = configloading.Config_reader()
 
     def red_mask(self,img,cnt):
+        self.height = self.config.reader("camera", "height", "intenger")
+        self.width = self.config.reader("camera", "weight", "intenger")
+        img = img[0:self.height//3*2,0:self.width]
+        self.height,self.width,_ = img.shape
         self.img = to_convert_HDR(img)
 
         # 赤色のHSV範囲

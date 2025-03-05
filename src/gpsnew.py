@@ -91,7 +91,7 @@ class GPSModule:
             self.log.write("Error while reading GPS data: {e}")
         return None, None, None, None, None
 
-def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_coordinate):
+def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_coordinate,TARGET_DISTANCE):
 #    log = logwrite.MyLogging()
     coordinate_diff_goal = {
         "lat":(goal_coordinate["lat"]-current_coordinate["lat"]),
@@ -119,7 +119,7 @@ def calculate_target_distance_angle(current_coordinate,previous_coordinate,goal_
     degree = (degree - 360) if (180 < degree) else degree
    
     distance = math.sqrt(coordinate_diff_goal["lat"] ** 2 + coordinate_diff_goal["lon"] ** 2) * math.pow(10,5)#m単位で距離を表現
-    if distance <= 5:
+    if distance <= TARGET_DISTANCE:
         #5m以内
         result = {"dir":"Immediate","deg":"0","distance":distance}
         return result

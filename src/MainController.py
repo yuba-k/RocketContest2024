@@ -83,9 +83,9 @@ def main():
         mv.move("forward",7)
 
         #初期目標地点へ接近開始
-        current_coordinate = gps_movement(Initial_Destination,current_coordinate)
+        current_coordinate = gps_movement(Initial_Destination,current_coordinate,5)
         #ゴール座標への接近開始
-        _ = gps_movement(GOAL,current_coordinate)
+        _ = gps_movement(GOAL,current_coordinate,8)
 
         #画像処理フェーズ
         condition = Status.CAMERAPhase.value
@@ -131,7 +131,7 @@ def main():
         gps.disconnect()
         cm.disconnect()
     
-def gps_movement(target:Dict[float,float]) -> dict[float,float]:
+def gps_movement(target:Dict[float,float],current_coordinate:Dict[float,float],TARGET_DISTANCE) -> dict[float,float]:
     while True:
         previous_coordinate = current_coordinate.copy()
         while True:
@@ -151,20 +151,20 @@ def gps_movement(target:Dict[float,float]) -> dict[float,float]:
 
         log.write(f"previous_coordinate:{previous_coordinate},current_coordinate{current_coordinate}","DEBUG")
 
-        result = gpsnew.calculate_target_distance_angle(current_coordinate,previous_coordinate,target)
+        result = gpsnew.calculate_target_distance_angle(current_coordinate,previous_coordinate,target,TARGET_DISTANCE)
         log.write(f"Distance:{result['distance']},Degree:{result['deg']}","INFO")
         if (result["dir"] != "Immediate"):
             if result["dir"] == "forward":
                 fm.transmitFMMessage("zensin")
             elif result["dir"] == "left":
                 fm.transmitFMMessage("hidari")
-                mv.move("left",8*(-result["deg"])/180)
+                mv.move("left",4*(-result["deg"])/180)
             else:
                 fm.transmitFMMessage("migi")
-                mv.move("right",8*(result["deg"])/180)
+                mv.move("right",4*(result["deg"])/180)
             mv.move("forward",15)
         else:
-            return current_coordinates
+            return current_coordinate
 
 if __name__ =="__main__":
     main()
