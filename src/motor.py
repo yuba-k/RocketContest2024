@@ -54,8 +54,8 @@ class Motor():
         GPIO.output(self.right_phase,GPIO.HIGH)
         GPIO.output(self.left_phase,GPIO.HIGH)
         if direction == "forward":
-            self.log.write(f"forward,Duty:{self.duty}","INFO")
-            self.right_duty = duty * 0.95
+            self.log.write(f"forward,Duty:{duty}","INFO")
+            self.right_duty = duty * 1.0
             self.left_duty = duty
         elif direction == "right" or direction == "search":
             self.log.write("right","INFO")
@@ -63,7 +63,7 @@ class Motor():
             self.left_duty = duty
         elif direction == "left":
             self.log.write("left","INFO")
-            self.right_duty = duty * 0.95
+            self.right_duty = duty * 1.0
             self.left_duty = duty * 0.6
         elif direction == "back":
             self.log.write("back","INFO")
@@ -82,7 +82,7 @@ def main():
     try:
         while True:
             direction =input("direction:")
-            motor.move(direction,3)
+            motor.move(direction,3,100)
     except KeyboardInterrupt:
         motor.cleanup()
 

@@ -35,7 +35,7 @@ class Camera():
 
 def main():
     camera = Camera()
-    camera.cap()
+    camera.cap(900)
 
 if __name__ == "__main__":
     main()

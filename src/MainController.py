@@ -39,7 +39,7 @@ except Exception as e:
 
 #大域変数の設定
 GOAL = {"lat":config.reader("GOAL","lat","float"),"lon":config.reader("GOAL","lon","float")}
-Initial_Destination = {"lat":GOAL["lat"],"lon":GOAL["lon"]-0.000200}#西に20mずらす
+Initial_Destination = {"lat":GOAL["lat"],"lon":GOAL["lon"]+0.000100}#西に10mずらす
 FLAG = False
 
 def stop_reqest():
@@ -67,6 +67,8 @@ def main():
 
         # # GPSフェーズ
         condition = Status.LOCATIONPhase.value
+        #キャリア脱出
+        mv.move("forward",8,duty=90)
         #初期位置の決定
         while True:
             try:
@@ -80,7 +82,8 @@ def main():
         log.write(f"Latitude:{lat},Longitude:{lon},Satellites:{satellites},Time:{utc_time},DOP{dop}","INFO")
         logwrite.forCSV(lat,lon)
         current_coordinate = {"lat":lat,"lon":lon}
-        mv.move("forward",7)
+        #初期移動
+        mv.move("forward",8,duty=90)
 
         #初期目標地点へ接近開始
         current_coordinate = gps_movement(Initial_Destination,current_coordinate,5)
@@ -100,7 +103,7 @@ def main():
                     break
                 elif direct == "search":
                     fm.transmitFMMessage("sagashitemasu")
-                    mv.move(direct,0.5,duty=50)
+                    mv.move(direct,0.5,duty=80)
                 else:
                     fm.transmitFMMessage("mituketa")
                     if direct == "forward":
